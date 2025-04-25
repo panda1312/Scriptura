@@ -1,0 +1,12 @@
+/* Basic page styling */
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Style for each flashcard */
+.card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+}
