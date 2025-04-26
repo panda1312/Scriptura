@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)  # Initialize the Flask app
 
-DATA_FILE = "flashcards.json"  # JSON file to store flashcards
+DATA_FILE = "/data/flashcards.json"  # JSON file to store flashcards
 
 # Function to load flashcards from the JSON file
 def load_flashcards():
