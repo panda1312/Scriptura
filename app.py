@@ -23,6 +23,13 @@ def save_flashcards(cards):
 def index():
     return render_template("index.html")  # Serves the HTML page
 
+# Route to serve the review page
+@app.route("/review")
+def review():
+    with open(DATA_FILE, 'r') as f:
+        flashcards = json.load(f)
+    return render_template("review.html", flashcards=flashcards)
+
 # API route to return all flashcards as JSON
 @app.route("/api/flashcards", methods=["GET"])
 def get_flashcards():
