@@ -5,6 +5,8 @@ body {
   padding: 20px;
   margin: 0;
   transition: background-color 0.3s, color 0.3s; /* Smooth transition between light and dark modes */
+  line-height: 1.6; /* Improved readability */
+  color: #333; /* Default text color */
 }
 
 /* Dark Mode styles */
@@ -54,6 +56,8 @@ a, button {
   margin: 10px 0;
   text-align: center;
   transition: background-color 0.3s ease;
+  cursor: pointer;
+  box-sizing: border-box; /* Ensure padding doesn't affect size */
 }
 
 /* Dark Mode Links & Buttons */
