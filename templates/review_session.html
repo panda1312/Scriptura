@@ -2,12 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Review Flashcards - Scriptura</title>
+    <title>Review Session - Scriptura</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>Review Session</h1>
+
+        <!-- Dark Mode Toggle (optional on review page if you'd like to allow toggle) -->
+        <div class="dark-mode-toggle">
+            <label for="dark-mode-toggle">Dark Mode:</label>
+            <input type="checkbox" id="dark-mode-toggle" />
+        </div>
+
         <a href="/" class="button">Go to Manage Cards</a>
 
         <div id="flashcard">
@@ -33,6 +40,22 @@
         let currentCardIndex = 0;
         let correctCount = 0;
 
+        // Dark Mode Logic
+        const toggle = document.getElementById("dark-mode-toggle");
+
+        // Check if dark mode was previously saved in localStorage
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            toggle.checked = true;
+        }
+
+        // Event listener for the dark mode toggle
+        toggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', toggle.checked); // Save the preference
+        });
+
+        // Flashcard Navigation Logic
         function showCurrentCard() {
             const card = flashcards[currentCardIndex];
             document.getElementById('question').textContent = card.front;
