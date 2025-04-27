@@ -1,124 +1,87 @@
-import os
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
 import json
 import random
+import os
+from datetime import timedelta
 import time
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Make sure to set a secret key for session management
+app.secret_key = "supersecretkey"  # For session security
 
-# Global variable for caching flashcards
-flashcards_cache = {}
+# Session timeout after 30 minutes of inactivity
+app.permanent_session_lifetime = timedelta(minutes=30)
 
-# Session timeout duration (in seconds)
-SESSION_TIMEOUT = 900  # 15 minutes
+DATA_FOLDER = "/data"  # All flashcard data stored per user here
 
-# Helper function to get the file path for the current user
+# Caching flashcards in memory
+flashcard_cache = {}
+flashcard_cache_time = {}
+
+# --- Helper functions ---
+
 def get_user_file():
-    """Return the path to the flashcard file for the logged-in user."""
+    """Returns the flashcard file path for the current user."""
     username = session.get('username')
-    if username:
-        return os.path.join('flashcards', f'{username}.json')  # Example path, adjust as necessary
-    return None
+    if not username:
+        return None
+    return os.path.join(DATA_FOLDER, f"{username}_flashcards.json")
 
-# Check if the session has expired
-def is_session_expired():
-    """Check if the session has expired based on last activity time."""
-    last_activity = session.get('last_activity')
-    if not last_activity:
-        return True
-
-    # Check if the session has expired
-    elapsed_time = time.time() - last_activity
-    if elapsed_time > SESSION_TIMEOUT:
-        return True
-
-    return False
-
-# Update session's last activity time
-def update_session_activity():
-    """Update the session activity time."""
-    session['last_activity'] = time.time()
-
-# Load flashcards from file, with caching
 def load_flashcards():
-    """Load flashcards for the logged-in user."""
+    """Load flashcards for the logged-in user with caching."""
     username = session.get('username')
+    if not username:
+        return []
 
-    # Check if flashcards are already cached for this user
-    if username in flashcards_cache:
-        return flashcards_cache[username]
+    # Check if the flashcards are cached and valid (cache expiry check)
+    if username in flashcard_cache and (time.time() - flashcard_cache_time.get(username, 0)) < 60:  # Cache expiry in 60 seconds
+        return flashcard_cache[username]
 
+    # Cache expired or not found, so load from file
     user_file = get_user_file()
     if not user_file or not os.path.exists(user_file):
-        flashcards_cache[username] = []  # Cache empty list if no file exists
         return []
 
-    try:
-        # Load flashcards from file
-        with open(user_file, "r") as f:
-            flashcards = json.load(f)
-        flashcards_cache[username] = flashcards  # Cache the flashcards for future use
+    with open(user_file, "r") as f:
+        flashcards = json.load(f)
+        # Cache the loaded flashcards and update the cache timestamp
+        flashcard_cache[username] = flashcards
+        flashcard_cache_time[username] = time.time()
         return flashcards
-    except (json.JSONDecodeError, IOError) as e:
-        flashcards_cache[username] = []  # Cache empty list in case of an error
-        print(f"Error loading flashcards for user {username}: {e}")
-        return []
 
-# Save flashcards to file
 def save_flashcards(cards):
-    """Save flashcards to the user's file."""
+    """Save flashcards for the logged-in user."""
     user_file = get_user_file()
     if user_file:
-        with open(user_file, 'w') as f:
-            json.dump(cards, f)
+        with open(user_file, "w") as f:
+            json.dump(cards, f, indent=2)
 
-# Route to manage flashcards
-@app.route("/", methods=["GET", "POST"])
+# --- Routes ---
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Login page where users can enter a username."""
+    if request.method == "POST":
+        username = request.form.get("username")
+        if username:
+            session['username'] = username
+            return redirect(url_for('index'))
+    return render_template("login.html")
+
+@app.route("/")
 def index():
-    """Display the flashcards and allow the user to add new ones."""
+    """Main page showing the list of flashcards."""
     if 'username' not in session:
-        flash('Please log in first!', 'error')
         return redirect(url_for('login'))
-
-    # Check session timeout
-    if is_session_expired():
-        flash('Your session has expired. Please log in again.', 'error')
-        session.pop('username', None)
-        return redirect(url_for('login'))
-
-    update_session_activity()  # Update session activity time
 
     flashcards = load_flashcards()
-
-    if request.method == "POST":
-        question = request.form.get("question")
-        answer = request.form.get("answer")
-        if not question or not answer:
-            flash('Please provide both a question and an answer.', 'error')
-        else:
-            new_flashcard = {"front": question, "back": answer}
-            flashcards.append(new_flashcard)
-            save_flashcards(flashcards)
-            flash('Flashcard added successfully!', 'success')
-
     return render_template("index.html", flashcards=flashcards)
 
-# Route to review flashcards
 @app.route("/review", methods=["GET", "POST"])
 def review():
     """Review mode where users can practice flashcards."""
     if 'username' not in session:
         flash('Please log in first!', 'error')
         return redirect(url_for('login'))
-
-    # Check session timeout
-    if is_session_expired():
-        flash('Your session has expired. Please log in again.', 'error')
-        session.pop('username', None)
-        return redirect(url_for('login'))
-
-    update_session_activity()  # Update session activity time
 
     flashcards = load_flashcards()
 
@@ -129,57 +92,44 @@ def review():
 
     return render_template("review_select.html", total=len(flashcards))
 
-# Route to get all flashcards via the API
 @app.route("/api/flashcards", methods=["GET"])
 def get_flashcards():
     """API route to get all flashcards."""
     return jsonify(load_flashcards())
 
-# Route to add a new flashcard via the API
 @app.route("/api/flashcards", methods=["POST"])
 def add_flashcard():
     """API route to add a new flashcard."""
     try:
         data = request.json
-        question = data.get("front")
-        answer = data.get("back")
+        question = data.get("question")
+        answer = data.get("answer")
         
         if not question or not answer:
-            return jsonify({"status": "error", "message": "Missing 'front' or 'back'."}), 400
+            return jsonify({"status": "error", "message": "Missing 'question' or 'answer'."}), 400
         
-        flashcards = load_flashcards()
-        flashcards.append(data)
-        save_flashcards(flashcards)
+        cards = load_flashcards()
+        cards.append(data)
+        save_flashcards(cards)
+
+        # Clear the flashcard cache to force it to reload next time
+        username = session.get('username')
+        if username:
+            flashcard_cache.pop(username, None)
+            flashcard_cache_time.pop(username, None)
+
         return jsonify({"status": "success"}), 201
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# Route to login
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Handle user login."""
-    if request.method == "POST":
-        username = request.form.get("username")
-        if username:
-            session['username'] = username
-            session['last_activity'] = time.time()  # Set initial activity time
-            flash(f'Welcome, {username}!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Please enter a username.', 'error')
-
-    return render_template("login.html")
-
-# Route to logout
 @app.route("/logout")
 def logout():
-    """Logout the user."""
+    """Logout current user."""
     session.pop('username', None)
-    session.pop('last_activity', None)
-    flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-# Main entry point
+# --- Main entry point ---
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
