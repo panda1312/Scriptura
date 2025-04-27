@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review Flashcards - Scriptura</title>
+</head>
+<body>
+    <h1>Review Flashcards</h1>
+    <a href="/">Go to Manage Cards</a>
+
+    <div id="flashcard">
+        <h2 id="question"></h2>
+        <h3 id="answer" style="display:none;"></h3>
+
+        <button onclick="showAnswer()">Show Answer</button>
+        <button onclick="nextCard()">Next Card</button>
+    </div>
+
+    <script>
+        const flashcards = {{ flashcards|tojson }};
+        let currentCardIndex = 0;
+
+        function showCurrentCard() {
+            const card = flashcards[currentCardIndex];
+            document.getElementById('question').textContent = card.front;
+            document.getElementById('answer').textContent = card.back;
+            document.getElementById('answer').style.display = 'none';
+        }
+
+        function showAnswer() {
+            document.getElementById('answer').style.display = 'block';
+        }
+
+        function nextCard() {
+            currentCardIndex++;
+            if (currentCardIndex >= flashcards.length) {
+                alert("You have reached the end of the deck!");
+                currentCardIndex = 0;  // restart
+            }
+            showCurrentCard();
+        }
+
+        // Initialize
+        showCurrentCard();
+    </script>
+</body>
+</html>
