@@ -82,6 +82,38 @@ def add_flashcard():
     save_flashcards(cards)
     return jsonify({"status": "success"}), 201
 
+# App route to migrate flash cards to new format.
+@app.route("/migrate_flashcards", methods=["POST"])
+def migrate_flashcards():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user_file = os.path.join(DATA_FOLDER, f"{session['username']}_flashcards.json")
+
+    if os.path.exists(user_file):
+        with open(user_file, "r") as f:
+            flashcards = json.load(f)
+
+        updated_flashcards = []
+        for card in flashcards:
+            if "front" in card and "back" in card:
+                updated_flashcards.append(card)
+            elif "question" in card and "answer" in card:
+                updated_flashcards.append({
+                    "front": card["question"],
+                    "back": card["answer"]
+                })
+            else:
+                continue  # skip unknown formats
+
+        with open(user_file, "w") as f:
+            json.dump(updated_flashcards, f, indent=2)
+
+        return jsonify({"status": "success", "message": "Migration completed!"})
+
+    return jsonify({"status": "error", "message": "No flashcards found."}), 404
+
+
 @app.route("/logout")
 def logout():
     """API route to logout current user."""
