@@ -60,6 +60,19 @@
     loadFlashcards(); // Load flashcards when the page loads
 </script>
 
+<script>
+  //Function for migration
+  document.getElementById("migrate-button").addEventListener("click", async () => {
+    if (confirm("Are you sure you want to migrate your flashcards?")) {
+      const res = await fetch("/migrate_flashcards", { method: "POST" });
+      const data = await res.json();
+      alert(data.message);
+      // After migration, reload flashcards
+      loadFlashcards();
+    }
+  });
+</script>
+
 
 </body>
 </html>
