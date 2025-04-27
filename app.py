@@ -8,7 +8,7 @@ import random  # Added import for random.sample used in review
 # --- Configuration and Setup ---
 app = Flask(__name__)
 # Set the path to store the database in the / folder
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'supersecretkey'  # For session security
 
