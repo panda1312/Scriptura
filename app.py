@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 import json
+import random
 import os
 
 app = Flask(__name__)  # Initialize the Flask app
@@ -24,11 +25,17 @@ def index():
     return render_template("index.html")  # Serves the HTML page
 
 # Route to serve the review page
-@app.route("/review")
+@app.route("/review", methods=["GET", "POST"])
 def review():
     with open(DATA_FILE, 'r') as f:
         flashcards = json.load(f)
-    return render_template("review.html", flashcards=flashcards)
+
+    if request.method == "POST":
+        num_cards = int(request.form.get("num_cards", len(flashcards)))
+        selected_cards = random.sample(flashcards, min(num_cards, len(flashcards)))
+        return render_template("review_session.html", flashcards=selected_cards)
+
+    return render_template("review_select.html", total=len(flashcards))
 
 # API route to return all flashcards as JSON
 @app.route("/api/flashcards", methods=["GET"])
