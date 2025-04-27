@@ -2,25 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcards - Scriptura</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script>
+        // Persistent Dark Mode Handling
+        window.onload = function() {
+            const darkMode = {{ dark_mode|tojson }}; // Get dark mode setting from the backend
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <h1>Flashcards</h1>
-
         <!-- Dark Mode Toggle -->
         <div class="dark-mode-toggle">
             <label for="dark-mode-toggle">Dark Mode:</label>
-            <input type="checkbox" id="dark-mode-toggle">
+            <input type="checkbox" id="dark-mode-toggle" {{ 'checked' if dark_mode else '' }}>
         </div>
 
-        <div id="actions">
-            <a href="/review" class="button">Go to Review Mode</a>
-            <button id="migrate-button" class="button">Migrate Flashcards</button>
-            <a href="/logout" class="button">Logout</a>
-        </div>
+        <a href="/review" class="button">Go to Review Mode</a>
+        <a href="/settings" class="button">Settings</a>
+        <a href="/logout" class="button">Logout</a>
 
         <form id="flashcard-form">
             <input type="text" id="question" placeholder="Question" required>
@@ -28,73 +33,49 @@
             <button type="submit" class="button">Add Flashcard</button>
         </form>
 
-        <div id="flashcards"></div>
+        <div id="flashcards">
+            {% for card in flashcards %}
+                <div class="card">
+                    <strong>Q:</strong> {{ card.front }}<br>
+                    <strong>A:</strong> {{ card.back }}
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
     <script>
-        // Function to load flashcards from the server
-        async function loadFlashcards() {
-            const res = await fetch("/api/flashcards"); // Fetch from API
-            const cards = await res.json(); // Parse the JSON
-            const container = document.getElementById("flashcards");
-            container.innerHTML = ""; // Clear any existing content
-
-            // Loop through the flashcards and add them to the page
-            cards.forEach(card => {
-                const div = document.createElement("div");
-                div.className = "card";
-                div.innerHTML = `<strong>Q:</strong> ${card.front}<br><strong>A:</strong> ${card.back}`;
-                container.appendChild(div);
+        // Handle dark mode toggle (send setting to backend)
+        document.getElementById('dark-mode-toggle').addEventListener('change', function () {
+            const darkMode = this.checked;
+            fetch('/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `dark_mode=${darkMode ? 'on' : 'off'}`
             });
-        }
+        });
 
-        // Handle form submission to add a new flashcard
-        document.getElementById("flashcard-form").addEventListener("submit", async (e) => {
-            e.preventDefault(); // Stop form from reloading the page
-            const front = document.getElementById("question").value;
-            const back = document.getElementById("answer").value;
-
-            // Send the new flashcard to the backend
-            await fetch("/api/flashcards", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ front, back }) // <-- THIS IS THE KEY CHANGE
+        // Handle adding new flashcards
+        document.getElementById('flashcard-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const front = document.getElementById('question').value;
+            const back = document.getElementById('answer').value;
+            fetch('/api/flashcards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ front, back })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Flashcard added!');
+                    window.location.reload(); // Reload the page to show the new flashcard
+                }
             });
-
-            // Clear the form and reload the flashcards
-            document.getElementById("question").value = "";
-            document.getElementById("answer").value = "";
-            loadFlashcards();
         });
-
-        // Function for migration
-        document.getElementById("migrate-button").addEventListener("click", async () => {
-            if (confirm("Are you sure you want to migrate your flashcards?")) {
-                const res = await fetch("/migrate_flashcards", { method: "POST" });
-                const data = await res.json();
-                alert(data.message);
-                // After migration, reload flashcards
-                loadFlashcards();
-            }
-        });
-
-        // Dark Mode Toggle Logic
-        const toggle = document.getElementById("dark-mode-toggle");
-
-        // Check if dark mode was previously saved in localStorage
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            toggle.checked = true;
-        }
-
-        // Event listener for the dark mode toggle
-        toggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', toggle.checked); // Save the preference
-        });
-
-        // Load initial flashcards
-        loadFlashcards();
     </script>
 </body>
 </html>
