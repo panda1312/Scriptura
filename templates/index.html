@@ -2,24 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashcards</title>
   <link rel="stylesheet" href="/static/style.css"> <!-- Link to our CSS -->
 </head>
 <body>
-  <h1>Flashcards</h1>
-  <a href="/review">Go to Review Mode</a>
-  <button id="migrate-button">Migrate Flashcards</button>
-  <a href="/logout">Logout</a>
+  <header>
+    <h1>Flashcards</h1>
+    <nav>
+      <a href="/review" class="nav-link">Go to Review Mode</a>
+      <button id="migrate-button" class="nav-button">Migrate Flashcards</button>
+      <a href="/logout" class="nav-link">Logout</a>
+    </nav>
+  </header>
 
   <!-- Flashcard form -->
-  <form id="flashcard-form">
-    <input type="text" id="question" placeholder="Question" required>
-    <input type="text" id="answer" placeholder="Answer" required>
-    <button type="submit">Add Flashcard</button>
-  </form>
+  <section id="flashcard-form-section">
+    <form id="flashcard-form">
+      <input type="text" id="question" placeholder="Enter Question" required class="input-field">
+      <input type="text" id="answer" placeholder="Enter Answer" required class="input-field">
+      <button type="submit" class="button-primary">Add Flashcard</button>
+    </form>
+  </section>
 
   <!-- Container where flashcards will be displayed -->
-  <div id="flashcards"></div>
+  <section id="flashcards-section">
+    <div id="flashcards"></div>
+  </section>
 
   <script>
     // Function to load flashcards from the server
@@ -58,21 +67,20 @@
     });
 
     loadFlashcards(); // Load flashcards when the page loads
-</script>
+  </script>
 
-<script>
-  //Function for migration
-  document.getElementById("migrate-button").addEventListener("click", async () => {
-    if (confirm("Are you sure you want to migrate your flashcards?")) {
-      const res = await fetch("/migrate_flashcards", { method: "POST" });
-      const data = await res.json();
-      alert(data.message);
-      // After migration, reload flashcards
-      loadFlashcards();
-    }
-  });
-</script>
-
+  <script>
+    // Function for migration
+    document.getElementById("migrate-button").addEventListener("click", async () => {
+      if (confirm("Are you sure you want to migrate your flashcards?")) {
+        const res = await fetch("/migrate_flashcards", { method: "POST" });
+        const data = await res.json();
+        alert(data.message);
+        // After migration, reload flashcards
+        loadFlashcards();
+      }
+    });
+  </script>
 
 </body>
 </html>
