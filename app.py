@@ -6,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Use SQLite for simplicity
+# Set the path to store the database in the /data/ folder
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data', 'site.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'supersecretkey'  # For session security
 
