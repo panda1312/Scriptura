@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Select Review Settings - Scriptura</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Start a Review Session</h1>
-    <a href="/">Go to Manage Cards</a>
+    <div class="container">
+        <h1>Start a Review Session</h1>
+        <a href="/" class="button">Go to Manage Cards</a>
 
-    <form method="post" action="/review">
-        <label for="num_cards">How many cards would you like to review? (Max: {{ total }})</label>
-        <input type="number" id="num_cards" name="num_cards" min="1" max="{{ total }}" value="5">
-        <button type="submit">Start Review</button>
-    </form>
+        <form method="post" action="/review">
+            <label for="num_cards">How many cards would you like to review? (Max: {{ total }})</label>
+            <input type="number" id="num_cards" name="num_cards" min="1" max="{{ total }}" value="5">
+            <button type="submit" class="button">Start Review</button>
+        </form>
+    </div>
 </body>
 </html>
