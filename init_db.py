@@ -3,6 +3,12 @@ from app import db, User, app
 def init_db():
     """Reset and initialize the database."""
     with app.app_context():
+        # Ask user for confirmation before dropping tables
+        confirmation = input("Are you sure you want to reset the database? This will delete all data. (y/n): ")
+        if confirmation.lower() != 'y':
+            print("Database reset cancelled.")
+            return
+        
         # Drop all existing tables
         db.drop_all()
         print("Dropped all tables.")
