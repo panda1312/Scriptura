@@ -1,35 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flashcards</title>
-  <link rel="stylesheet" href="/static/style.css"> <!-- Link to our CSS -->
+    <meta charset="UTF-8">
+    <title>Flashcards - Scriptura</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header>
-    <h1>Flashcards</h1>
-    <nav>
-      <a href="/review" class="nav-link">Go to Review Mode</a>
-      <button id="migrate-button" class="nav-button">Migrate Flashcards</button>
-      <a href="/logout" class="nav-link">Logout</a>
-    </nav>
-  </header>
+    <div class="container">
+        <h1>Flashcards</h1>
+        <a href="/review" class="button">Go to Review Mode</a>
+        <button id="migrate-button" class="button">Migrate Flashcards</button>
+        <a href="/logout" class="button">Logout</a>
 
-  <!-- Flashcard form -->
-  <section id="flashcard-form-section">
-    <form id="flashcard-form">
-      <input type="text" id="question" placeholder="Enter Question" required class="input-field">
-      <input type="text" id="answer" placeholder="Enter Answer" required class="input-field">
-      <button type="submit" class="button-primary">Add Flashcard</button>
-    </form>
-  </section>
+        <form id="flashcard-form">
+            <input type="text" id="question" placeholder="Question" required>
+            <input type="text" id="answer" placeholder="Answer" required>
+            <button type="submit" class="button">Add Flashcard</button>
+        </form>
 
-  <!-- Container where flashcards will be displayed -->
-  <section id="flashcards-section">
-    <div id="flashcards"></div>
-  </section>
-
+        <div id="flashcards"></div>
+    </div>
+  
   <script>
     // Function to load flashcards from the server
     async function loadFlashcards() {
