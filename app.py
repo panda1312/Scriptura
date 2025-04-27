@@ -82,6 +82,13 @@ def add_flashcard():
     save_flashcards(cards)
     return jsonify({"status": "success"}), 201
 
+@app.route("/logout")
+def logout():
+    """API route to logout current user."""
+    session.pop('username', None)
+    return redirect(url_for('login'))
+
+
 # --- Main entry point ---
 
 if __name__ == "__main__":
