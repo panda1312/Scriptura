@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Review Flashcards - Scriptura</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Review Flashcards</h1>
-    <a href="/">Go to Manage Cards</a>
+    <div class="container">
+        <h1>Review Flashcards</h1>
+        <a href="/" class="button">Go to Manage Cards</a>
 
-    <div id="flashcard">
-        <h2 id="question"></h2>
-        <h3 id="answer" style="display:none;"></h3>
+        <div id="flashcard">
+            <h2 id="question"></h2>
+            <h3 id="answer" style="display:none;"></h3>
 
-        <button onclick="showAnswer()">Show Answer</button>
-        <button onclick="nextCard()">Next Card</button>
+            <button onclick="showAnswer()" class="button">Show Answer</button>
+            <button onclick="nextCard()" class="button">Next Card</button>
+        </div>
     </div>
 
     <script>
