@@ -211,17 +211,20 @@ def delete_user(id):
     flash("User deleted successfully.", "success")
     return redirect(url_for('manage_users'))
 
-
-# --- Main entry point ---
-if __name__ == "__main__":
-    db.create_all()  # Ensure tables are created when the app starts
-
-    # Create default admin user if it doesn't exist
+# --- Ensure the default admin user exists ---
+def create_default_admin():
+    """Create a default admin user if none exists."""
+    if not os.path.exists('site.db'):  # Check if the database exists
+        db.create_all()  # Create the database and tables
+    # Check if the admin user exists
     admin = User.query.filter_by(username='admin').first()
     if not admin:
         admin = User(username='admin', dark_mode=False)
         db.session.add(admin)
         db.session.commit()
-        print("Default admin user created!")
-    
+        print("Default admin user created.")
+
+# --- Main entry point ---
+if __name__ == "__main__":
+    create_default_admin()  # Ensure default admin user is created
     app.run(host="0.0.0.0", port=5000, debug=True)
