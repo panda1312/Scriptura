@@ -31,7 +31,7 @@
       cards.forEach(card => {
         const div = document.createElement("div");
         div.className = "card";
-        div.innerHTML = `<strong>Q:</strong> ${card.question}<br><strong>A:</strong> ${card.answer}`;
+        div.innerHTML = `<strong>Q:</strong> ${card.front}<br><strong>A:</strong> ${card.back}`;
         container.appendChild(div);
       });
     }
@@ -39,14 +39,14 @@
     // Handle form submission to add a new flashcard
     document.getElementById("flashcard-form").addEventListener("submit", async (e) => {
       e.preventDefault(); // Stop form from reloading the page
-      const question = document.getElementById("question").value;
-      const answer = document.getElementById("answer").value;
+      const front = document.getElementById("question").value;
+      const back = document.getElementById("answer").value;
 
       // Send the new flashcard to the backend
       await fetch("/api/flashcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, answer })
+        body: JSON.stringify({ front, back }) // <-- THIS IS THE KEY CHANGE
       });
 
       // Clear the form and reload the flashcards
@@ -56,6 +56,8 @@
     });
 
     loadFlashcards(); // Load flashcards when the page loads
-  </script>
+</script>
+
+
 </body>
 </html>
