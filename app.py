@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 import os
 from sqlalchemy.exc import IntegrityError
+import random  # Added import for random.sample used in review
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
@@ -26,6 +27,10 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.username}>"
 
+    def check_password(self, password):
+        # In a real app, use password hashing, but for now, we use a simple check
+        return self.username == password  # Replace with actual password check if implemented
+
 class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     front = db.Column(db.String(200), nullable=False)
@@ -38,9 +43,9 @@ class Flashcard(db.Model):
 # --- Helper functions ---
 def get_user():
     """Returns the User object for the current session."""
-    if 'username' not in session:
+    if 'user_id' not in session:
         return None
-    user = User.query.filter_by(username=session['username']).first()
+    user = User.query.get(session['user_id'])
     return user
 
 def load_flashcards():
@@ -60,9 +65,8 @@ def save_flashcard(front, back):
 
 def is_admin():
     """Check if the current user is an admin."""
-    if 'username' not in session or session['username'] != 'admin':
-        return False
-    return True
+    user = get_user()
+    return user and user.username == 'admin'
 
 # --- Routes ---
 @app.route("/login", methods=["GET", "POST"])
@@ -72,7 +76,7 @@ def login():
         username = request.form.get("username")
         user = User.query.filter_by(username=username).first()
         if user:
-            session['username'] = username
+            session['user_id'] = user.id  # Store user ID, not username
             return redirect(url_for('index'))
         flash("Username does not exist", "error")
     return render_template("login.html")
@@ -80,17 +84,18 @@ def login():
 @app.route("/")
 def index():
     """Main page showing the list of flashcards."""
-    if 'username' not in session:
+    user = get_user()
+    if not user:
         return redirect(url_for('login'))
 
     flashcards = load_flashcards()
-    user = get_user()
     return render_template("index.html", flashcards=flashcards, dark_mode=user.dark_mode)
 
 @app.route("/review", methods=["GET", "POST"])
 def review():
     """Review mode where users can practice flashcards."""
-    if 'username' not in session:
+    user = get_user()
+    if not user:
         flash('Please log in first!', 'error')
         return redirect(url_for('login'))
 
@@ -127,7 +132,7 @@ def add_flashcard():
 @app.route("/logout")
 def logout():
     """Logout current user."""
-    session.pop('username', None)
+    session.pop('user_id', None)  # Use user_id in session
     return redirect(url_for('login'))
 
 @app.route("/settings", methods=["GET", "POST"])
