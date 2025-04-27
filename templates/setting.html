@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - Scriptura</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Settings</h1>
+        <form method="POST">
+            <label for="dark_mode">Dark Mode</label>
+            <input type="checkbox" id="dark_mode" name="dark_mode" {% if dark_mode %}checked{% endif %}>
+            <button type="submit" class="button">Save Settings</button>
+        </form>
+        <a href="/" class="button">Back to Dashboard</a>
+    </div>
+</body>
+</html>
