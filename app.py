@@ -1,10 +1,14 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
 import json
 import random
 import os
+from datetime import timedelta
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # For session security
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'supersecretkey')  # Use an environment variable for production
+
+# Session timeout after 30 minutes of inactivity
+app.permanent_session_lifetime = timedelta(minutes=30)
 
 DATA_FOLDER = "/data"  # All flashcard data stored per user here
 
@@ -40,14 +44,19 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         if username:
+            session.permanent = True  # Make the session permanent (auto-expiration based on the set timedelta)
             session['username'] = username
+            flash('Login successful!', 'success')
             return redirect(url_for('index'))
+        else:
+            flash('Please enter a username!', 'error')
     return render_template("login.html")
 
 @app.route("/")
 def index():
     """Main page showing the list of flashcards."""
     if 'username' not in session:
+        flash('Please log in first!', 'error')
         return redirect(url_for('login'))
 
     flashcards = load_flashcards()
@@ -57,6 +66,7 @@ def index():
 def review():
     """Review mode where users can practice flashcards."""
     if 'username' not in session:
+        flash('Please log in first!', 'error')
         return redirect(url_for('login'))
 
     flashcards = load_flashcards()
@@ -76,16 +86,27 @@ def get_flashcards():
 @app.route("/api/flashcards", methods=["POST"])
 def add_flashcard():
     """API route to add a new flashcard."""
-    data = request.json
-    cards = load_flashcards()
-    cards.append(data)
-    save_flashcards(cards)
-    return jsonify({"status": "success"}), 201
+    try:
+        data = request.json
+        question = data.get("question")
+        answer = data.get("answer")
+        
+        if not question or not answer:
+            return jsonify({"status": "error", "message": "Missing 'question' or 'answer'."}), 400
+        
+        cards = load_flashcards()
+        cards.append(data)
+        save_flashcards(cards)
+        return jsonify({"status": "success"}), 201
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # App route to migrate flash cards to new format.
 @app.route("/migrate_flashcards", methods=["POST"])
 def migrate_flashcards():
     if 'username' not in session:
+        flash('Please log in first!', 'error')
         return redirect(url_for('login'))
 
     user_file = os.path.join(DATA_FOLDER, f"{session['username']}_flashcards.json")
@@ -109,8 +130,10 @@ def migrate_flashcards():
         with open(user_file, "w") as f:
             json.dump(updated_flashcards, f, indent=2)
 
+        flash('Flashcards migrated successfully!', 'success')
         return jsonify({"status": "success", "message": "Migration completed!"})
 
+    flash('No flashcards found for migration.', 'error')
     return jsonify({"status": "error", "message": "No flashcards found."}), 404
 
 
@@ -118,6 +141,7 @@ def migrate_flashcards():
 def logout():
     """API route to logout current user."""
     session.pop('username', None)
+    flash('Logged out successfully.', 'success')
     return redirect(url_for('login'))
 
 
