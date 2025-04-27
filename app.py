@@ -1,34 +1,65 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 import json
 import random
 import os
 
-app = Flask(__name__)  # Initialize the Flask app
+app = Flask(__name__)
+app.secret_key = "supersecretkey"  # For session security
 
-DATA_FILE = "/data/flashcards.json"  # JSON file to store flashcards
+DATA_FOLDER = "/data"  # All flashcard data stored per user here
 
-# Function to load flashcards from the JSON file
+# --- Helper functions ---
+
+def get_user_file():
+    """Returns the flashcard file path for the current user."""
+    username = session.get('username')
+    if not username:
+        return None
+    return os.path.join(DATA_FOLDER, f"{username}_flashcards.json")
+
 def load_flashcards():
-    if not os.path.exists(DATA_FILE):  # If the file doesn't exist yet
-        return []  # Return an empty list
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)  # Load and return the list of flashcards
+    """Load flashcards for the logged-in user."""
+    user_file = get_user_file()
+    if not user_file or not os.path.exists(user_file):
+        return []
+    with open(user_file, "r") as f:
+        return json.load(f)
 
-# Function to save flashcards to the JSON file
 def save_flashcards(cards):
-    with open(DATA_FILE, "w") as f:
-        json.dump(cards, f, indent=2)  # Save with indentation for readability
+    """Save flashcards for the logged-in user."""
+    user_file = get_user_file()
+    if user_file:
+        with open(user_file, "w") as f:
+            json.dump(cards, f, indent=2)
 
-# Route to serve the main web page
+# --- Routes ---
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Login page where users can enter a username."""
+    if request.method == "POST":
+        username = request.form.get("username")
+        if username:
+            session['username'] = username
+            return redirect(url_for('index'))
+    return render_template("login.html")
+
 @app.route("/")
 def index():
-    return render_template("index.html")  # Serves the HTML page
+    """Main page showing the list of flashcards."""
+    if 'username' not in session:
+        return redirect(url_for('login'))
 
-# Route to serve the review page
+    flashcards = load_flashcards()
+    return render_template("index.html", flashcards=flashcards)
+
 @app.route("/review", methods=["GET", "POST"])
 def review():
-    with open(DATA_FILE, 'r') as f:
-        flashcards = json.load(f)
+    """Review mode where users can practice flashcards."""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    flashcards = load_flashcards()
 
     if request.method == "POST":
         num_cards = int(request.form.get("num_cards", len(flashcards)))
@@ -37,20 +68,21 @@ def review():
 
     return render_template("review_select.html", total=len(flashcards))
 
-# API route to return all flashcards as JSON
 @app.route("/api/flashcards", methods=["GET"])
 def get_flashcards():
+    """API route to get all flashcards."""
     return jsonify(load_flashcards())
 
-# API route to add a new flashcard (called via JavaScript POST request)
 @app.route("/api/flashcards", methods=["POST"])
 def add_flashcard():
-    data = request.json  # Get flashcard data sent by frontend
-    cards = load_flashcards()  # Load current cards
-    cards.append(data)  # Add the new one
-    save_flashcards(cards)  # Save updated list
-    return jsonify({"status": "success"}), 201  # Return a success response
+    """API route to add a new flashcard."""
+    data = request.json
+    cards = load_flashcards()
+    cards.append(data)
+    save_flashcards(cards)
+    return jsonify({"status": "success"}), 201
 
-# Run the app in debug mode when executed directly
+# --- Main entry point ---
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
