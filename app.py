@@ -57,6 +57,12 @@ def save_flashcard(front, back):
         db.session.add(new_flashcard)
         db.session.commit()
 
+def is_admin():
+    """Check if the current user is an admin."""
+    if 'username' not in session or session['username'] != 'admin':
+        return False
+    return True
+
 # --- Routes ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -138,7 +144,84 @@ def settings():
 
     return render_template("settings.html", dark_mode=user.dark_mode)
 
+@app.route("/admin/users")
+def manage_users():
+    """Display a list of all users."""
+    if not is_admin():
+        flash("You must be an admin to view this page.", "error")
+        return redirect(url_for('index'))
+
+    users = User.query.all()  # Get all users
+    return render_template("manage_users.html", users=users)
+
+
+@app.route("/admin/users/add", methods=["GET", "POST"])
+def add_user():
+    """Add a new user (admin only)."""
+    if not is_admin():
+        flash("You must be an admin to perform this action.", "error")
+        return redirect(url_for('index'))
+
+    if request.method == "POST":
+        username = request.form.get("username")
+        dark_mode = request.form.get("dark_mode") == "on"  # Toggle dark_mode
+        existing_user = User.query.filter_by(username=username).first()
+
+        if existing_user:
+            flash("Username already exists.", "error")
+        else:
+            new_user = User(username=username, dark_mode=dark_mode)
+            db.session.add(new_user)
+            db.session.commit()
+            flash("User added successfully.", "success")
+            return redirect(url_for('manage_users'))
+
+    return render_template("add_user.html")
+
+
+@app.route("/admin/users/edit/<int:id>", methods=["GET", "POST"])
+def edit_user(id):
+    """Edit an existing user (admin only)."""
+    if not is_admin():
+        flash("You must be an admin to perform this action.", "error")
+        return redirect(url_for('index'))
+
+    user = User.query.get_or_404(id)
+
+    if request.method == "POST":
+        user.username = request.form.get("username")
+        user.dark_mode = request.form.get("dark_mode") == "on"
+        db.session.commit()
+        flash("User details updated successfully.", "success")
+        return redirect(url_for('manage_users'))
+
+    return render_template("edit_user.html", user=user)
+
+
+@app.route("/admin/users/delete/<int:id>")
+def delete_user(id):
+    """Delete a user (admin only)."""
+    if not is_admin():
+        flash("You must be an admin to perform this action.", "error")
+        return redirect(url_for('index'))
+
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("User deleted successfully.", "success")
+    return redirect(url_for('manage_users'))
+
+
 # --- Main entry point ---
 if __name__ == "__main__":
     db.create_all()  # Ensure tables are created when the app starts
+
+    # Create default admin user if it doesn't exist
+    admin = User.query.filter_by(username='admin').first()
+    if not admin:
+        admin = User(username='admin', dark_mode=False)
+        db.session.add(admin)
+        db.session.commit()
+        print("Default admin user created!")
+    
     app.run(host="0.0.0.0", port=5000, debug=True)
