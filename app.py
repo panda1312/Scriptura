@@ -6,8 +6,8 @@ from sqlalchemy.exc import IntegrityError
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
-# Set the path to store the database in the /data/ folder
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data', 'site.db')}"
+# Set the path to store the database in the / folder
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'supersecretkey'  # For session security
 
@@ -215,15 +215,15 @@ def delete_user(id):
 # --- Ensure the default admin user exists ---
 def create_default_admin():
     """Create a default admin user if none exists."""
-    if not os.path.exists('site.db'):  # Check if the database exists
-        db.create_all()  # Create the database and tables
-    # Check if the admin user exists
-    admin = User.query.filter_by(username='admin').first()
-    if not admin:
-        admin = User(username='admin', dark_mode=False)
-        db.session.add(admin)
-        db.session.commit()
-        print("Default admin user created.")
+    with app.app_context():
+        db.create_all()  # Always run this safely
+        # Check if the admin user exists
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            admin = User(username='admin', dark_mode=False)
+            db.session.add(admin)
+            db.session.commit()
+            print("Default admin user created.")
 
 # --- Main entry point ---
 if __name__ == "__main__":
