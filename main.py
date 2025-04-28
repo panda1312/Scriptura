@@ -212,6 +212,15 @@ def delete_user(id):
     flash("User deleted successfully.", "success")
     return redirect(url_for('manage_users'))
 
+# --- Helper function to log in the admin automatically ---
+def auto_login_admin():
+    """Automatically log in as the admin user."""
+    with app.app_context():
+        admin = User.query.filter_by(username='admin').first()
+        if admin:
+            session['user_id'] = admin.id  # Set session for the admin user
+
 # --- Main entry point ---
 if __name__ == "__main__":
+    auto_login_admin()  # Automatically log in as the admin
     app.run(host="0.0.0.0", port=5000, debug=True)
