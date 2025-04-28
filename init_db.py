@@ -10,18 +10,34 @@ def init_db():
             return
         
         # Drop all existing tables
-        db.drop_all()
-        print("Dropped all tables.")
+        try:
+            db.drop_all()
+            print("Dropped all tables.")
+        except Exception as e:
+            print(f"Error dropping tables: {e}")
+            return
         
         # Recreate all tables
-        db.create_all()
-        print("Created new tables.")
+        try:
+            db.create_all()
+            print("Created new tables.")
+        except Exception as e:
+            print(f"Error creating tables: {e}")
+            return
         
-        # Create default admin user
-        admin = User(username='admin', dark_mode=False)
-        db.session.add(admin)
-        db.session.commit()
-        print("Default admin user created.")
+        # Check if the admin user already exists before creating it
+        admin = User.query.filter_by(username='admin').first()
+        if admin:
+            print("Admin user already exists.")
+        else:
+            try:
+                # Create default admin user if it doesn't exist
+                admin = User(username='admin', dark_mode=False)
+                db.session.add(admin)
+                db.session.commit()
+                print("Default admin user created.")
+            except Exception as e:
+                print(f"Error creating admin user: {e}")
 
 if __name__ == "__main__":
     init_db()
