@@ -5,6 +5,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 import random  # For review random sampling
 from init_db import init_db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
@@ -22,14 +23,21 @@ with app.app_context():
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)  # Add the password field
     dark_mode = db.Column(db.Boolean, default=False)
     flashcards = db.relationship('Flashcard', backref='owner', lazy=True)
 
     def __repr__(self):
         return f"<User {self.username}>"
 
+    def set_password(self, password):
+        """Hash the password and set it."""
+        self.password = generate_password_hash(password)
+
     def check_password(self, password):
-        return self.username == password  # (You should replace with real password hashing later)
+        """Check if the hashed password matches."""
+        return check_password_hash(self.password, password)
+
 
 class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
