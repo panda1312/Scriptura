@@ -59,14 +59,6 @@ def is_admin():
     user = get_user()
     return user and user.username == 'admin'
 
-# --- Auto-login Admin if No Session (NEW) ---
-@app.before_request
-def auto_login_admin():
-    if 'user_id' not in session:
-        admin = User.query.filter_by(username='admin').first()
-        if admin:
-            session['user_id'] = admin.id
-
 # --- Routes ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -201,6 +193,18 @@ def delete_user(id):
     db.session.commit()
     flash("User deleted successfully.", "success")
     return redirect(url_for('manage_users'))
+
+# --- Auto-login Admin in Development Mode ---
+@app.before_request
+def auto_login_admin():
+    if app.debug:
+        if 'user_id' not in session:
+            admin = User.query.filter_by(username='admin').first()
+            if admin:
+                session['user_id'] = admin.id
+                if request.endpoint != 'static':
+                    return redirect(request.path)
+
 
 # --- Main entry point ---
 if __name__ == "__main__":
