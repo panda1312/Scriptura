@@ -120,7 +120,7 @@ def add_flashcard():
         data = request.json
         front = data.get("front")
         back = data.get("back")
-        
+
         if not front or not back:
             return jsonify({"status": "error", "message": "Missing 'front' or 'back'."}), 400
 
