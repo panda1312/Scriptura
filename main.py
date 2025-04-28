@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
-import os
-from sqlalchemy.exc import IntegrityError
 import random  # Added import for random.sample used in review
 
 # --- Configuration and Setup ---
@@ -160,7 +158,6 @@ def manage_users():
     users = User.query.all()  # Get all users
     return render_template("manage_users.html", users=users)
 
-
 @app.route("/admin/users/add", methods=["GET", "POST"])
 def add_user():
     """Add a new user (admin only)."""
@@ -184,7 +181,6 @@ def add_user():
 
     return render_template("add_user.html")
 
-
 @app.route("/admin/users/edit/<int:id>", methods=["GET", "POST"])
 def edit_user(id):
     """Edit an existing user (admin only)."""
@@ -203,7 +199,6 @@ def edit_user(id):
 
     return render_template("edit_user.html", user=user)
 
-
 @app.route("/admin/users/delete/<int:id>")
 def delete_user(id):
     """Delete a user (admin only)."""
@@ -217,20 +212,6 @@ def delete_user(id):
     flash("User deleted successfully.", "success")
     return redirect(url_for('manage_users'))
 
-# --- Ensure the default admin user exists ---
-def create_default_admin():
-    """Create a default admin user if none exists."""
-    with app.app_context():
-        db.create_all()  # Always run this safely
-        # Check if the admin user exists
-        admin = User.query.filter_by(username='admin').first()
-        if not admin:
-            admin = User(username='admin', dark_mode=False)
-            db.session.add(admin)
-            db.session.commit()
-            print("Default admin user created.")
-
 # --- Main entry point ---
 if __name__ == "__main__":
-    create_default_admin()  # Ensure default admin user is created
     app.run(host="0.0.0.0", port=5000, debug=True)
