@@ -4,8 +4,8 @@ from datetime import timedelta
 import os
 from sqlalchemy.exc import IntegrityError
 import random  # For review random sampling
-from init_db import init_db
 from werkzeug.security import generate_password_hash, check_password_hash
+from init_db import init_db
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
@@ -23,7 +23,7 @@ with app.app_context():
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(256), nullable=False)  # Add the password field
+    password = db.Column(db.String(256), nullable=False)  # Password column added
     dark_mode = db.Column(db.Boolean, default=False)
     flashcards = db.relationship('Flashcard', backref='owner', lazy=True)
 
@@ -31,11 +31,11 @@ class User(db.Model):
         return f"<User {self.username}>"
 
     def set_password(self, password):
-        """Hash the password and set it."""
+        """Hash the password before saving it."""
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        """Check if the hashed password matches."""
+        """Check the password against the hashed value."""
         return check_password_hash(self.password, password)
 
 
@@ -76,11 +76,12 @@ def is_admin():
 def login():
     if request.method == "POST":
         username = request.form.get("username")
+        password = request.form.get("password")  # Get the password input
         user = User.query.filter_by(username=username).first()
-        if user:
+        if user and user.check_password(password):  # Check the hashed password
             session['user_id'] = user.id
             return redirect(url_for('index'))
-        flash("Username does not exist", "error")
+        flash("Invalid username or password", "error")
     return render_template("login.html")
 
 @app.route("/")
