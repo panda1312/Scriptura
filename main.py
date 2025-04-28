@@ -4,6 +4,7 @@ from datetime import timedelta
 import os
 from sqlalchemy.exc import IntegrityError
 import random  # For review random sampling
+from init_db import init_db
 
 # --- Configuration and Setup ---
 app = Flask(__name__)
@@ -13,6 +14,9 @@ app.secret_key = 'supersecretkey'  # Use a secure key in production
 app.permanent_session_lifetime = timedelta(minutes=30)
 
 db = SQLAlchemy(app)
+
+with app.app_context():
+    init_db()  # This will run on startup
 
 # --- Database Models ---
 class User(db.Model):
