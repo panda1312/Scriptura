@@ -73,12 +73,16 @@ def login():
 
 @app.route("/")
 def index():
-    user = get_user()
-    if not user:
-        return redirect(url_for('login'))
+    """Default page: automatically login as admin and go to add user page."""
+    admin = User.query.filter_by(username='admin').first()
 
-    flashcards = load_flashcards()
-    return render_template("index.html", flashcards=flashcards, dark_mode=user.dark_mode)
+    if admin:
+        session.permanent = True
+        session['user_id'] = admin.id
+        return redirect(url_for('add_user'))
+    else:
+        flash("Admin user not found. Please create one.", "error")
+        return redirect(url_for('login'))
 
 @app.route("/review", methods=["GET", "POST"])
 def review():
