@@ -1,5 +1,5 @@
-Flask==2.1.1
-werkzeug==2.0.3
+Flask==2.2.3
+Flask-SQLAlchemy==2.5.1
+SQLAlchemy==1.4.40
 gunicorn==20.1.0
-flask_sqlalchemy==2.5.1
-SQLAlchemy==1.4.27  # Ensure a compatible version of SQLAlchemy
+werkzeug==2.2.3
