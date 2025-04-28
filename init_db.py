@@ -1,6 +1,3 @@
-from app import db, User, app
-from werkzeug.security import generate_password_hash  # Important to hash passwords!
-
 def init_db():
     """Initialize the database without dropping existing data."""
     with app.app_context():
@@ -18,17 +15,14 @@ def init_db():
             print("Admin user already exists.")
         else:
             try:
-                # Create default admin user with a password if it doesn't exist
+                # Create default admin user with a hashed password if it doesn't exist
                 admin = User(
                     username='admin',
-                    password=generate_password_hash('admin', method='sha256'),
-                    dark_mode=False
+                    dark_mode=True
                 )
+                admin.set_password('admin')  # Use the set_password method to hash the password
                 db.session.add(admin)
                 db.session.commit()
                 print("Default admin user created.")
             except Exception as e:
                 print(f"Error creating admin user: {e}")
-
-if __name__ == "__main__":
-    init_db()
