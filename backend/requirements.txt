@@ -2,7 +2,7 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
-psycopg2  # or another database driver
+psycopg2-binary
 pyjwt
 passlib
 python-dotenv
