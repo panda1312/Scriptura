@@ -13,7 +13,7 @@ services:
     build: ./frontend
     container_name: react-frontend
     ports:
-      - "80:80"
+      - "1427:80"
     depends_on:
       - backend
 
