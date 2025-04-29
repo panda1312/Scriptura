@@ -5,9 +5,21 @@ const Dashboard = () => {
   const [decks, setDecks] = useState([]);
 
   useEffect(() => {
-    axios.get('/decks')
-      .then(response => setDecks(response.data))
-      .catch(error => console.error(error));
+    const fetchDecks = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/decks`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setDecks(response.data);
+      } catch (error) {
+        console.error('Failed to fetch decks:', error);
+      }
+    };
+
+    fetchDecks();
   }, []);
 
   return (

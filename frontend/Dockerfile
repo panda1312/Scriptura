@@ -1,18 +1,16 @@
-# Frontend Dockerfile (React)
-FROM node:16-slim
+# Build stage
+FROM node:20 AS build
 
 WORKDIR /app
-
-COPY ./package.json /app/package.json
-COPY ./package-lock.json /app/package-lock.json
-
+COPY package.json package-lock.json ./
 RUN npm install
-
-COPY ./src /app/src
-COPY ./public /app/public
-
+COPY . .
 RUN npm run build
 
-EXPOSE 80
+# Serve stage
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
 
-CMD ["npm", "start"]
+# Expose port 80 for nginx
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
