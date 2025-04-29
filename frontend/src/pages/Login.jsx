@@ -10,10 +10,19 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, {
-        username: email,
-        password: password,
-      });
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
+
+      const response = await axios.post(
+  `${process.env.REACT_APP_API_URL}/users/login`,
+  params,
+  {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  }
+);
       localStorage.setItem('token', response.data.access_token);
       navigate('/dashboard');
     } catch (error) {
