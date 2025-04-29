@@ -1,26 +1,31 @@
 services:
-  # Backend (FastAPI)
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend  # Ensure this points to the backend Dockerfile
-    container_name: scriptura-backend
-    volumes:
-      - ./data:/app/data
+    build: ./backend
+    container_name: fastapi-backend
     ports:
       - "8000:8000"
     environment:
-      - ENV=production
-    restart: unless-stopped
-
-  # Frontend (React)
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend  # Make sure to point to the React Dockerfile
-    container_name: scriptura-frontend
-    ports:
-      - "80:80"  # Exposing port 80 for nginx
+      - DATABASE_URL=postgresql://user:password@db:5432/dbname
     depends_on:
-      - backend  # Ensure backend is available before frontend starts
-    restart: unless-stopped
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: dbname
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

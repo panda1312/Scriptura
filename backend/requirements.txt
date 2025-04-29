@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+psycopg2  # or another database driver
+pyjwt
+passlib
+python-dotenv
