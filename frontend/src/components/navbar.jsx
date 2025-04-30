@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = () => {
   const toggleTheme = async () => {
@@ -31,11 +32,14 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="navbar">
-      <Link to="/dashboard">Dashboard</Link>
-      <button onClick={toggleTheme} style={{ marginLeft: '1rem' }}>
-        Toggle Theme
-      </button>
+    <nav className="hig-navbar">
+      <div className="hig-navbar-title">Scriptura</div>
+      <div>
+        <Link to="/dashboard" className="hig-nav-link">Dashboard</Link>
+        <button className="hig-theme-toggle" onClick={toggleTheme}>
+          Toggle Theme
+        </button>
+      </div>
     </nav>
   );
 };
