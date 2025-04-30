@@ -1,1 +1,25 @@
+:root {
+  /* Typography */
+  --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-lg: 20px;
 
+  /* Colors (light mode) */
+  --color-bg: #f9f9f9;
+  --color-surface: #ffffff;
+  --color-text: #1c1c1e;
+  --color-muted: #6e6e73;
+  --color-accent: #007aff;
+  --color-border: #dcdcdc;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  /* Radius & effects */
+  --radius: 10px;
+  --transition: all 0.2s ease-in-out;
+}
