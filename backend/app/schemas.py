@@ -44,3 +44,6 @@ class FlashcardOut(FlashcardBase):
     deck_id: int
     class Config:
         orm_mode = True
+
+class ThemeUpdate(BaseModel):
+    theme: str
