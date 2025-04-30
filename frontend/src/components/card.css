@@ -1,0 +1,9 @@
+.hig-card {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: var(--transition);
+}
