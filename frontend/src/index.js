@@ -1,3 +1,7 @@
+// Apply theme before React renders
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.dataset.theme = savedTheme;
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
