@@ -6,6 +6,7 @@ import './theme.css';
 import './dark-theme.css'; // this should come after theme.css
 import './global.css';
 import './index.css';
+import './components/Navbar.css';
 
 
 function App() {
