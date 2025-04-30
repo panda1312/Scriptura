@@ -1,18 +1,20 @@
-// frontend/src/components/Navbar.jsx
-import './Navbar.css';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default function Navbar() {
+const Navbar = () => {
   const toggleTheme = () => {
     const html = document.documentElement;
     html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
   };
 
   return (
-    <nav className="hig-navbar">
-      <div className="hig-navbar-title">Scriptura</div>
-      <button className="hig-theme-toggle" onClick={toggleTheme}>
+    <nav className="navbar">
+      <Link to="/dashboard">Dashboard</Link>
+      <button onClick={toggleTheme} style={{ marginLeft: '1rem' }}>
         Toggle Theme
       </button>
     </nav>
   );
-}
+};
+
+export default Navbar;
