@@ -15,15 +15,24 @@ const Login = () => {
       params.append('password', password);
 
       const response = await axios.post(
-  `${process.env.REACT_APP_API_URL}/users/login`,
-  params,
-  {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  }
-);
+        `${process.env.REACT_APP_API_URL}/users/login`,
+        params,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+
+      // Store the access token in localStorage
       localStorage.setItem('token', response.data.access_token);
+
+      // Store the theme preference (from response) in localStorage
+      if (response.data.theme) {
+        localStorage.setItem('theme', response.data.theme);  // Store theme
+        document.documentElement.setAttribute('data-theme', response.data.theme);  // Apply theme immediately
+      }
+
       navigate('/dashboard');
     } catch (error) {
       alert('Login failed.');
@@ -40,14 +49,16 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-        /><br/>
+        />
+        <br />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-        /><br/>
+        />
+        <br />
         <button type="submit">Login</button>
       </form>
     </div>
