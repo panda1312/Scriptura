@@ -6,9 +6,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import './theme.css';
-import './dark-theme.css'; // this should come after theme.css
-import './global.css';
+import './styles/theme.css';
+import './styles/dark-theme.css'; // this should come after theme.css
+import './styles/global.css';
 import './index.css';
 import './components/Navbar.css';
 
