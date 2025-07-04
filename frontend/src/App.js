@@ -2,9 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import './theme.css';
-import './dark-theme.css'; // this should come after theme.css
-import './global.css';
+import './styles/theme.css';
+import './styles/dark-theme.css'; // this should come after theme.css
+import './styles/global.css';
 import './index.css';
 import './components/Navbar.css';
 
