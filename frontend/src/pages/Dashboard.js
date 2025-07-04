@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
-import '../styles/card.css';  // Assuming card styles are in styles folder
-import '../styles/button.css';
+import '../components/card.css';  // Assuming card styles are in styles folder
+import '../components/button.css';
 
 const Dashboard = () => {
   const [decks, setDecks] = useState([]);
