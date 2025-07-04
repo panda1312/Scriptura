@@ -10,7 +10,7 @@ import './styles/theme.css';
 import './styles/dark-theme.css'; // this should come after theme.css
 import './styles/global.css';
 import './index.css';
-import './components/Navbar.css';
+import './components/navbar.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
